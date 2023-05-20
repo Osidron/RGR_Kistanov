@@ -160,7 +160,7 @@ BEGIN {ReadWord}
   ReadSpace(F, ChArr[0]);
   LowerCase(ChArr[0]);
   I := 1;
-  IF ChArr[1] <> '#'
+  IF ChArr[0] <> '#'
   THEN
     BEGIN
       WHILE (NOT EOLN(F)) AND (NOT EndOfWord) AND (NOT EOF(F)) AND (I <= ArrLen - 1)
