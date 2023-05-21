@@ -2,16 +2,13 @@ UNIT
   WorkWithWordReading;
 INTERFACE
 CONST
-  ArrLen = 64;
-  Space = [' ', '!', '"', '#', '$', '%', '&', '''','(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '\', '[', ']', '^', '_', '`', '{', '}', '|', '~', '0' .. '9', 'Ђ', 'ї'];
+  Len = 255;
+  SupportedSymbols = ['A' .. 'Z', 'a' .. 'z', 'а' .. '€', 'ј' .. 'я', '-'];
 TYPE
-  LenType = 0 .. ArrLen;
-  ArrType = ARRAY [LenType] OF CHAR;  
-PROCEDURE ReadWord(VAR F: TEXT; VAR ChArr: ArrType); {„итает слово из файла и измен€ет его (убирает лишние дефисы, переводит в нижний регистр). ѕрисвает ChArr[0] значение '#' при конце файла и отсутствии слова}
-
+  LenType = 0 .. Len;
+PROCEDURE ReadWord(VAR F: TEXT; VAR Str: STRING);
 
 IMPLEMENTATION
-
 PROCEDURE LowerCase(VAR Ch: CHAR);
 BEGIN {LowerCase}
   CASE Ch OF
@@ -41,39 +38,6 @@ BEGIN {LowerCase}
     'X': Ch := 'x';
     'Y': Ch := 'y';
     'Z': Ch := 'z';
-    'А': Ch := '†';
-    'Б': Ch := '°';
-    'В': Ch := 'Ґ';
-    'Г': Ch := '£';
-    'Д': Ch := '§';
-    'Е': Ch := '•';                               
-    'р': Ch := 'с';
-    'Ж': Ch := '¶';
-    'З': Ch := 'І';
-    'И': Ch := '®';
-    'Й': Ch := '©';
-    'К': Ch := '™';
-    'Л': Ch := 'Ђ';
-    'М': Ch := 'ђ';
-    'Н': Ch := '≠';
-    'О': Ch := 'Ѓ';
-    'П': Ch := 'ѓ';
-    'Р': Ch := 'а';
-    'С': Ch := 'б';
-    'Т': Ch := 'в';
-    'У': Ch := 'г';
-    'Ф': Ch := 'д';
-    'Х': Ch := 'е';
-    'Ц': Ch := 'ж';
-    'Ч': Ch := 'з';
-    'Ш': Ch := 'и';
-    'Щ': Ch := 'й';
-    'Ь': Ch := 'м';
-    'Ы': Ch := 'Ы';
-    'Ъ': Ch := 'к';
-    'Э': Ch := 'н';
-    'Ю': Ch := 'Ю';
-    'Я': Ch := 'п';
     'ј': Ch := 'а';
     'Ѕ': Ch := 'б';
     '¬': Ch := 'в';
@@ -105,75 +69,92 @@ BEGIN {LowerCase}
     'џ': Ch := 'џ';
     'Џ': Ch := 'ъ';
     'Ё': Ch := 'э';
-    'ё': Ch := 'ё';
+    'ё': Ch := 'ю';
     'я': Ch := '€';
   ELSE
     Ch := Ch;
   END
 END;  {LowerCase}
 
-PROCEDURE CleanHyphensAtTheEnd(VAR ChArr: ArrType);
+PROCEDURE CleanAfterDollar(VAR Str: STRING);
+VAR
+  I: LenType;
+BEGIN
+  I := 0;
+  WHILE Str[I] <> '$'
+  DO
+    I := I + 1;
+  I := I + 1;
+  FOR I := I TO Len
+  DO
+    Str[I] := ' ';
+END;
+
+PROCEDURE CleanHyphensAtTheEnd(VAR Str: STRING);
 VAR
   L: LenType;
 BEGIN {CleanHyphensAtTheEnd}
   L := 0;
-  WHILE ChArr[L] <> '$'
+  WHILE Str[L] <> '$'
   DO
     L := L + 1;
-  IF ChArr[L - 1] = '-'
+  IF Str[L - 1] = '-'
   THEN
     BEGIN
       L := L - 1;
-      WHILE ChArr[L] = '-'
+      WHILE Str[L] = '-'                                            {ќстановилс€ здесь. Ќадо проверить, что все перешло на STRING, чекнуть работу ANSILOWERCASE, заменить ReadUntilLetter, убрать Space окончательно}
       DO
         BEGIN
-          ChArr[L] := '$';
+          Str[L] := '$';
           L := L - 1
         END
     END
 END;  {CleanHyphensAtTheEnd}
 
-PROCEDURE ReadSpace(VAR F: TEXT; VAR Ch: CHAR);
+PROCEDURE ReadUntilLetter(VAR F: TEXT; VAR Ch: CHAR);
 BEGIN {ReadSpace}
   Ch := '*';
-  IF NOT EOF(F)
-  THEN
-    REPEAT
+  REPEAT
+    IF NOT EOF(F)
+    THEN
       IF NOT EOLN(F)
       THEN
         READ(F, Ch)
       ELSE
-        READLN(F);
-    UNTIL NOT(((Ch IN Space) OR (Ch = '-')) AND (NOT EOF(F)));
-  IF EOF(F)
+        READLN(F)
+    ELSE
+      BREAK
+  UNTIL NOT(NOT(Ch IN SupportedSymbols) OR (Ch = '-'));
+  IF EOF(F) AND (Ch = '*')
   THEN
     Ch := '#'
 END;   {ReadSpace}
  
-PROCEDURE ReadWord(VAR F: TEXT; VAR ChArr: ArrType);
+PROCEDURE ReadWord(VAR F: TEXT; VAR Str: STRING);
 VAR
   I: LenType;
   EndOfWord, HyphenFound: BOOLEAN;  
 BEGIN {ReadWord}
   EndOfWord := FALSE;
   HyphenFound := FALSE;
-  ReadSpace(F, ChArr[0]);
-  LowerCase(ChArr[0]);
+  ReadUntilLetter(F, Str[0]);
+  LowerCase(Str[0]);
+  WRITELN;
   I := 1;
-  IF ChArr[0] <> '#'
+  IF Str[0] <> '#'
   THEN
     BEGIN
-      WHILE (NOT EOLN(F)) AND (NOT EndOfWord) AND (NOT EOF(F)) AND (I <= ArrLen - 1)
+      WHILE (NOT EOLN(F)) AND (NOT EndOfWord) AND (NOT EOF(F)) AND (I <= Len - 1)
       DO
         BEGIN
-          READ(F, ChArr[I]);
-          LowerCase(ChArr[I]); 
-          IF NOT(ChArr[I] IN Space)
+          READ(F, Str[I]);
+          LowerCase(Str[I]); 
+          IF Str[I] IN SupportedSymbols
           THEN
             BEGIN
               IF (NOT HyphenFound)
               THEN
-                IF (ChArr[I] <> '-')
+                IF (Str[I] <> '-')
                 THEN
                   I := I + 1
                 ELSE
@@ -182,7 +163,7 @@ BEGIN {ReadWord}
                     I := I + 1
                   END
               ELSE
-                IF (ChArr[I] <> '-')
+                IF (Str[I] <> '-')
                 THEN
                   BEGIN
                     HyphenFound := FALSE;
@@ -191,11 +172,11 @@ BEGIN {ReadWord}
             END 
           ELSE
             EndOfWord := TRUE
-        END;
-        ChArr[I] := '$';
-        CleanHyphensAtTheEnd(ChArr);
-    END
-  
+        END;  
+      Str[I] := '$';
+      CleanHyphensAtTheEnd(Str);
+      CleanAfterDollar(Str);
+    END  
 END;   {ReadWord}
 BEGIN {WorkWithWordReading}
 END.  {WorkWithWordReading}

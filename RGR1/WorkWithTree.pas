@@ -1,96 +1,66 @@
 UNIT
   WorkWithTree;
 INTERFACE
-CONST
-  ArrLen = 64;
-  Space = [' ', '!', '"', '#', '$', '%', '&', '''','(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '\', '[', ']', '^', '_', '`', '{', '}', '|', '~', '0' .. '9', '«', '»'];
-TYPE
-  LenType = 0 .. ArrLen;
-  ArrType = ARRAY [LenType] OF CHAR;  
-PROCEDURE TreeSort(ChArr: ArrType);  {Процедура добавления слова в дерево для сортировки}
-PROCEDURE PrintSorted(VAR F: TEXT);  {Процедура вывода отсортированных по алфавиту слов в файл в формате: <слово><пробел><количество вхождений>}
+PROCEDURE InsertWord(Str: STRING);          {Процедура добавления слова в дерево для сортировки}
+PROCEDURE PrintWordAndAmount(VAR F: TEXT);  {Процедура вывода отсортированных по алфавиту слов в файл в формате: <слово><пробел><количество вхождений>}
+
 IMPLEMENTATION
+CONST
+  Len = 255;
 TYPE
+  LenType = 0 .. Len;
   Tree = ^NodeType;
   NodeType = RECORD
-               ChArr: ArrType;
+               Str: STRING;
                Amount: INTEGER;
                Len: LenType;
-               Left: Tree;
-               Right: Tree
+               Left, Right: Tree
              END;
 
 VAR
   StorageRoot: Tree;
 
-FUNCTION ArrComparison(VAR Arr1, Arr2: ArrType): INTEGER;
-VAR
-  I: LenType;
-BEGIN {ArrComparison}
-  I := 0;
-  ArrComparison := 0;
-  REPEAT
-    IF Arr1[I] < Arr2[I]
-    THEN
-      ArrComparison := 1
-    ELSE
-      IF Arr1[I] > Arr2[I]
-      THEN
-        ArrComparison := 2
-      ELSE
-        I := I + 1
-  UNTIL NOT((Arr1[I] <> '$') AND (Arr2[I] <> '$') AND (ArrComparison = 0));
-  IF (Arr1[I] = '$') AND (Arr2[I] <> '$')
-  THEN
-    ArrComparison := 1;
-  IF (Arr1[I] <> '$') AND (Arr2[I] = '$')
-  THEN
-    ArrComparison := 2;
-END;  {ArrComparison}
-
-PROCEDURE InsertWordInTree(VAR Node: Tree; ChArr: ArrType); 
+PROCEDURE InsertWordInTree(VAR Node: Tree; Str: STRING); 
 BEGIN {InsertWordInTree}
   IF Node = NIL
   THEN
-    BEGIN
-      NEW(Node);
-      Node^.Amount := 1;
+    BEGIN                                                               
+      NEW(Node);                                                        // решить проблему Ю ю hello (Ю в верхнем регистре выводится)
+      Node^.Amount := 1;                                                // убрать съедание слова из одного символа перед EOF
       Node^.Len := 0; 
-      WHILE ChArr[Node^.Len] <> '$'
+      WHILE Str[Node^.Len] <> '$'
       DO
         Node^.Len := Node^.Len + 1;
-      Node^.ChArr := ChArr;
+      Node^.Str := Str;
       Node^.Left := NIL;
       Node^.Right := NIL
     END
   ELSE
-    IF ArrComparison(ChArr, Node^.ChArr) = 1 
+    IF Str < Node^.Str
     THEN
-      InsertWordInTree(Node^.Left, ChArr)
+      InsertWordInTree(Node^.Left, Str)
     ELSE
-      IF ArrComparison(ChArr, Node^.ChArr) = 2
+      IF Str > Node^.Str
       THEN
-        InsertWordInTree(Node^.Right, ChArr)
+        InsertWordInTree(Node^.Right, Str)
       ELSE
-        IF ArrComparison(ChArr, Node^.ChArr) = 0
-        THEN
-          Node^.Amount := Node^.Amount + 1
+        Node^.Amount := Node^.Amount + 1
 END;  {InsertWordInTree}
 
-PROCEDURE TreeSort(ChArr: ArrType);
+PROCEDURE InsertWord(Str: STRING);
 BEGIN {TreeSort}
-  InsertWordInTree(StorageRoot, ChArr);
+  InsertWordInTree(StorageRoot, Str);
 END;  {TreeSort}
 
-PROCEDURE PrintWord(VAR F: TEXT; ChArr: ArrType);
+PROCEDURE PrintWord(VAR F: TEXT; Str: STRING);
 VAR
   I: INTEGER;
 BEGIN {PrintWord}
   I := 0;
-  WHILE ChArr[I] <> '$'
+  WHILE Str[I] <> '$'
   DO                                             
     BEGIN
-      WRITE(F, ChArr[I]);
+      WRITE(F, Str[I]);
       I := I + 1
     END
 END; {PrintWord}
@@ -102,14 +72,14 @@ BEGIN {PrintTree}
     BEGIN
       PrintTree(F, Node^.Left);
       DISPOSE(Node^.Left);
-      PrintWord(F, Node^.ChArr);
+      PrintWord(F, Node^.Str);
       WRITELN(F, ' ', Node^.Amount);
       PrintTree(F, Node^.Right);
       DISPOSE(Node^.Right)
     END
 END; {PrintTree}
 
-PROCEDURE PrintSorted(VAR F: TEXT);
+PROCEDURE PrintWordAndAmount(VAR F: TEXT);
 BEGIN {PrintSorted}
   PrintTree(F, StorageRoot)
 END;  {PrintSorted}
