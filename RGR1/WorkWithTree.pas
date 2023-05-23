@@ -1,8 +1,8 @@
 UNIT
   WorkWithTree;
 INTERFACE
-PROCEDURE InsertWord(Str: STRING);          {Процедура добавления слова в дерево для сортировки}
-PROCEDURE PrintWordAndAmount(VAR F: TEXT);  {Процедура вывода отсортированных по алфавиту слов в файл в формате: <слово><пробел><количество вхождений>}
+PROCEDURE InsertWord(Str: STRING);          
+PROCEDURE PrintWordAndAmount(VAR F: TEXT);  
 
 IMPLEMENTATION
 CONST
@@ -25,8 +25,8 @@ BEGIN {InsertWordInTree}
   IF Node = NIL
   THEN
     BEGIN                                                               
-      NEW(Node);                                                        // решить проблему Ю ю hello (Ю в верхнем регистре выводится)
-      Node^.Amount := 1;                                                // убрать съедание слова из одного символа перед EOF
+      NEW(Node);                            
+      Node^.Amount := 1;                    
       Node^.Len := 0; 
       WHILE Str[Node^.Len] <> '$'
       DO

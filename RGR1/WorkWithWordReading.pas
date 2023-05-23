@@ -1,14 +1,14 @@
 UNIT
   WorkWithWordReading;
 INTERFACE
+PROCEDURE ReadWord(VAR F: TEXT; VAR Str: STRING);
+IMPLEMENTATION
 CONST
   Len = 255;
   SupportedSymbols = ['A' .. 'Z', 'a' .. 'z', 'а' .. 'я', 'А' .. 'Я', '-'];
 TYPE
   LenType = 0 .. Len;
-PROCEDURE ReadWord(VAR F: TEXT; VAR Str: STRING);
 
-IMPLEMENTATION
 PROCEDURE LowerCase(VAR Ch: CHAR);
 BEGIN {LowerCase}
   CASE Ch OF
@@ -102,7 +102,7 @@ BEGIN {CleanHyphensAtTheEnd}
   THEN
     BEGIN
       L := L - 1;
-      WHILE Str[L] = '-'                                            {Остановился здесь. Надо проверить, что все перешло на STRING, чекнуть работу ANSILOWERCASE, заменить ReadUntilLetter, убрать Space окончательно}
+      WHILE Str[L] = '-'                                          
       DO
         BEGIN
           Str[L] := '$';
@@ -125,7 +125,7 @@ BEGIN {ReadSpace}
     ELSE
       BREAK
   UNTIL NOT(NOT(Ch IN SupportedSymbols) OR (Ch = '-'));
-  IF EOF(F) AND (Ch = '*')
+  IF EOF(F) AND NOT(Ch IN SupportedSymbols)
   THEN
     Ch := '#'
 END;   {ReadSpace}
