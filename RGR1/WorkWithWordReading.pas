@@ -5,7 +5,7 @@ PROCEDURE ReadWord(VAR F: TEXT; VAR Str: STRING);
 IMPLEMENTATION
 CONST
   Len = 255;
-  SupportedSymbols = ['A' .. 'Z', 'a' .. 'z', 'à' .. 'ÿ', 'À' .. 'ß', '-'];
+  SupportedSymbols = ['A' .. 'Z', 'a' .. 'z', 'à' .. 'ÿ', 'À' .. 'ß', '¨', '¸', '-'];
 TYPE
   LenType = 0 .. Len;
 
@@ -44,7 +44,8 @@ BEGIN {LowerCase}
     'Ã': Ch := 'ã';
     'Ä': Ch := 'ä';
     'Å': Ch := 'å';
-    '¨', '¸': Ch := 'å';
+    '¨': Ch := 'å';
+    '¸': Ch := 'å';
     'Æ': Ch := 'æ';
     'Ç': Ch := 'ç';
     'È': Ch := 'è';

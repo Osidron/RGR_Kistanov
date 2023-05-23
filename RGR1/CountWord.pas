@@ -23,6 +23,6 @@ BEGIN {CountWords}
     END;
   PrintWordAndAmount(OUTPUT);
   WRITELN(OUTPUT);
-  WRITELN(OUTPUT, 'Общее количество слов - ', GlobalCounter)
+  WRITELN(OUTPUT, '╬с∙хх ъюышўхёЄтю ёыют - ', GlobalCounter)
 END.  {CountWords}
         
