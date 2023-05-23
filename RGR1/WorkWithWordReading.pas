@@ -139,7 +139,6 @@ BEGIN {ReadWord}
   HyphenFound := FALSE;
   ReadUntilLetter(F, Str[0]);
   LowerCase(Str[0]);
-  WRITELN;
   I := 1;
   IF Str[0] <> '#'
   THEN

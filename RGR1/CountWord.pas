@@ -12,7 +12,6 @@ BEGIN {CountWords}
   DO
     BEGIN
       ReadWord(INPUT, Str);
-      WRITELN(Str);
       IF Str[0] <> '#'
       THEN
         BEGIN      
